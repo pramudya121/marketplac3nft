@@ -14,7 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      listings: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          listing_id: number
+          nft_id: string | null
+          price: string
+          seller_address: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          listing_id: number
+          nft_id?: string | null
+          price: string
+          seller_address: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          listing_id?: number
+          nft_id?: string | null
+          price?: string
+          seller_address?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_nft_id_fkey"
+            columns: ["nft_id"]
+            isOneToOne: false
+            referencedRelation: "nfts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfts: {
+        Row: {
+          contract_address: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          metadata_uri: string | null
+          name: string
+          owner_address: string
+          token_id: number
+          updated_at: string
+        }
+        Insert: {
+          contract_address: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          metadata_uri?: string | null
+          name: string
+          owner_address: string
+          token_id: number
+          updated_at?: string
+        }
+        Update: {
+          contract_address?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          metadata_uri?: string | null
+          name?: string
+          owner_address?: string
+          token_id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      offers: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          nft_id: string | null
+          offerer_address: string
+          price: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          nft_id?: string | null
+          offerer_address: string
+          price: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          nft_id?: string | null
+          offerer_address?: string
+          price?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_nft_id_fkey"
+            columns: ["nft_id"]
+            isOneToOne: false
+            referencedRelation: "nfts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          created_at: string
+          from_address: string
+          id: string
+          nft_id: string | null
+          price: string | null
+          to_address: string
+          transaction_hash: string | null
+          transaction_type: string
+        }
+        Insert: {
+          created_at?: string
+          from_address: string
+          id?: string
+          nft_id?: string | null
+          price?: string | null
+          to_address: string
+          transaction_hash?: string | null
+          transaction_type: string
+        }
+        Update: {
+          created_at?: string
+          from_address?: string
+          id?: string
+          nft_id?: string | null
+          price?: string | null
+          to_address?: string
+          transaction_hash?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_nft_id_fkey"
+            columns: ["nft_id"]
+            isOneToOne: false
+            referencedRelation: "nfts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
