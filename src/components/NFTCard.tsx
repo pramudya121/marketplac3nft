@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Tag, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/web3";
 
 interface NFTCardProps {
   tokenId: number;
@@ -15,6 +16,12 @@ interface NFTCardProps {
   onBuy?: () => void;
   onMakeOffer?: () => void;
   className?: string;
+  showActions?: boolean;
+  customAction?: {
+    label: string;
+    onClick: () => void;
+    show: boolean;
+  };
 }
 
 export const NFTCard = ({
@@ -28,6 +35,8 @@ export const NFTCard = ({
   onBuy,
   onMakeOffer,
   className,
+  showActions = true,
+  customAction,
 }: NFTCardProps) => {
   const formatAddress = (addr: string) => {
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
@@ -66,33 +75,46 @@ export const NFTCard = ({
               <Tag className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">Price</p>
-                <p className="font-bold text-lg">{price} HELIOS</p>
+                <p className="font-bold text-lg">{formatPrice(price)} HELIOS</p>
               </div>
             </div>
           )}
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 gap-2">
-        {isListed && onBuy && (
-          <Button 
-            onClick={onBuy} 
-            className="flex-1 sakura-gradient font-semibold"
-          >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Buy Now
-          </Button>
-        )}
-        {onMakeOffer && (
-          <Button 
-            onClick={onMakeOffer} 
-            variant="outline"
-            className="flex-1 font-semibold"
-          >
-            Make Offer
-          </Button>
-        )}
-      </CardFooter>
+      {(showActions || customAction?.show) && (
+        <CardFooter className="p-4 pt-0 gap-2">
+          {customAction?.show ? (
+            <Button 
+              onClick={customAction.onClick}
+              className="flex-1 sakura-gradient font-semibold"
+            >
+              {customAction.label}
+            </Button>
+          ) : showActions ? (
+            <>
+              {isListed && onBuy && (
+                <Button 
+                  onClick={onBuy} 
+                  className="flex-1 sakura-gradient font-semibold"
+                >
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  Buy Now
+                </Button>
+              )}
+              {onMakeOffer && (
+                <Button 
+                  onClick={onMakeOffer} 
+                  variant="outline"
+                  className="flex-1 font-semibold"
+                >
+                  Make Offer
+                </Button>
+              )}
+            </>
+          ) : null}
+        </CardFooter>
+      )}
     </Card>
   );
 };

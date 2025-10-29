@@ -20,9 +20,22 @@ interface NFTGridProps {
   loading?: boolean;
   onBuyNFT?: (nft: NFT) => void;
   onMakeOffer?: (nft: NFT) => void;
+  showActions?: boolean;
+  customAction?: {
+    label: string;
+    onClick: (nft: NFT) => void;
+    condition?: (nft: NFT) => boolean;
+  };
 }
 
-export const NFTGrid = ({ nfts, loading, onBuyNFT, onMakeOffer }: NFTGridProps) => {
+export const NFTGrid = ({ 
+  nfts, 
+  loading, 
+  onBuyNFT, 
+  onMakeOffer,
+  showActions = true,
+  customAction,
+}: NFTGridProps) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -63,6 +76,12 @@ export const NFTGrid = ({ nfts, loading, onBuyNFT, onMakeOffer }: NFTGridProps) 
           isListed={nft.listing?.active || false}
           onBuy={onBuyNFT ? () => onBuyNFT(nft) : undefined}
           onMakeOffer={onMakeOffer ? () => onMakeOffer(nft) : undefined}
+          showActions={showActions}
+          customAction={customAction ? {
+            label: customAction.label,
+            onClick: () => customAction.onClick(nft),
+            show: !customAction.condition || customAction.condition(nft)
+          } : undefined}
         />
       ))}
     </div>

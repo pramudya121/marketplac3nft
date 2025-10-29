@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sparkles, Plus, Search } from "lucide-react";
@@ -6,6 +6,7 @@ import { WalletConnect } from "@/components/WalletConnect";
 import { SakuraAnimation } from "@/components/SakuraAnimation";
 import { NFTGrid } from "@/components/NFTGrid";
 import { MintNFTModal } from "@/components/MintNFTModal";
+import { FilterSort } from "@/components/FilterSort";
 import { supabase } from "@/integrations/supabase/client";
 import { buyNFT, makeOffer, formatPrice } from "@/lib/web3";
 import { toast } from "sonner";
@@ -17,6 +18,8 @@ const Index = () => {
   const [nfts, setNfts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [filterBy, setFilterBy] = useState("all");
 
   useEffect(() => {
     // Check wallet connection
@@ -129,9 +132,44 @@ const Index = () => {
     }
   };
 
-  const filteredNFTs = nfts.filter((nft) =>
-    nft.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAndSortedNFTs = useMemo(() => {
+    let filtered = nfts.filter((nft) =>
+      nft.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Apply filter
+    if (filterBy === "listed") {
+      filtered = filtered.filter((nft) => nft.listing);
+    } else if (filterBy === "unlisted") {
+      filtered = filtered.filter((nft) => !nft.listing);
+    }
+
+    // Apply sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "price_low":
+          if (!a.listing) return 1;
+          if (!b.listing) return -1;
+          return parseFloat(formatPrice(a.listing.price)) - parseFloat(formatPrice(b.listing.price));
+        case "price_high":
+          if (!a.listing) return 1;
+          if (!b.listing) return -1;
+          return parseFloat(formatPrice(b.listing.price)) - parseFloat(formatPrice(a.listing.price));
+        case "name_asc":
+          return a.name.localeCompare(b.name);
+        case "name_desc":
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
+
+    return sorted;
+  }, [nfts, searchQuery, sortBy, filterBy]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -198,9 +236,17 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Filter and Sort */}
+        <FilterSort
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          filterBy={filterBy}
+          onFilterChange={setFilterBy}
+        />
+
         {/* NFT Grid */}
         <NFTGrid
-          nfts={filteredNFTs}
+          nfts={filteredAndSortedNFTs}
           loading={loading}
           onBuyNFT={handleBuyNFT}
           onMakeOffer={handleMakeOffer}

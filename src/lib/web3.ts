@@ -285,3 +285,16 @@ export async function acceptOffer(tokenId: number): Promise<boolean> {
 export function formatPrice(price: string): string {
   return formatEther(price);
 }
+
+export async function getBalance(): Promise<string> {
+  try {
+    const signer = await getSigner();
+    if (!signer) return "0";
+    
+    const balance = await signer.provider.getBalance(await signer.getAddress());
+    return formatEther(balance);
+  } catch (error) {
+    console.error("Error getting balance:", error);
+    return "0";
+  }
+}

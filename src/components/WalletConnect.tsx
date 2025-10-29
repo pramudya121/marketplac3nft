@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Wallet, ChevronDown } from "lucide-react";
-import { connectWallet, WalletType } from "@/lib/web3";
+import { Wallet, ChevronDown, User } from "lucide-react";
+import { connectWallet, WalletType, getBalance } from "@/lib/web3";
 import { cn } from "@/lib/utils";
 
 export const WalletConnect = () => {
+  const navigate = useNavigate();
   const [address, setAddress] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string>("0");
   const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
@@ -21,6 +25,7 @@ export const WalletConnect = () => {
         const accounts = await window.ethereum.request({ method: "eth_accounts" });
         if (accounts.length > 0) {
           setAddress(accounts[0]);
+          loadBalance();
         }
       }
     };
@@ -30,15 +35,24 @@ export const WalletConnect = () => {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts: string[]) => {
         setAddress(accounts.length > 0 ? accounts[0] : null);
+        if (accounts.length > 0) {
+          loadBalance();
+        }
       });
     }
   }, []);
+
+  const loadBalance = async () => {
+    const bal = await getBalance();
+    setBalance(parseFloat(bal).toFixed(4));
+  };
 
   const handleConnect = async (walletType: WalletType) => {
     setIsConnecting(true);
     const account = await connectWallet(walletType);
     if (account) {
       setAddress(account);
+      loadBalance();
     }
     setIsConnecting(false);
   };
@@ -49,10 +63,23 @@ export const WalletConnect = () => {
 
   if (address) {
     return (
-      <Button variant="outline" className="font-medium backdrop-blur-sm">
-        <Wallet className="mr-2 h-4 w-4" />
-        {formatAddress(address)}
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="font-medium backdrop-blur-sm">
+            <Wallet className="mr-2 h-4 w-4" />
+            <div className="flex flex-col items-start">
+              <span className="text-xs">{balance} HELIOS</span>
+              <span className="text-xs">{formatAddress(address)}</span>
+            </div>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={() => navigate(`/profile/${address}`)}>
+            <User className="mr-2 h-4 w-4" />
+            My Profile
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
