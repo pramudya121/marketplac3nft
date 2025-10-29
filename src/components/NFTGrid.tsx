@@ -22,9 +22,13 @@ interface NFTGridProps {
   onMakeOffer?: (nft: NFT) => void;
   showActions?: boolean;
   customAction?: {
-    label: string;
+    label: string | ((nft: NFT) => string);
     onClick: (nft: NFT) => void;
     condition?: (nft: NFT) => boolean;
+    secondaryAction?: {
+      label: string;
+      onClick: (nft: NFT) => void;
+    };
   };
 }
 
@@ -78,9 +82,11 @@ export const NFTGrid = ({
           onMakeOffer={onMakeOffer ? () => onMakeOffer(nft) : undefined}
           showActions={showActions}
           customAction={customAction ? {
-            label: customAction.label,
+            label: typeof customAction.label === 'function' ? customAction.label(nft) : customAction.label,
             onClick: () => customAction.onClick(nft),
-            show: !customAction.condition || customAction.condition(nft)
+            show: !customAction.condition || customAction.condition(nft),
+            secondaryLabel: customAction.secondaryAction?.label,
+            onSecondaryClick: customAction.secondaryAction ? () => customAction.secondaryAction.onClick(nft) : undefined
           } : undefined}
         />
       ))}

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NFTGrid } from "@/components/NFTGrid";
 import { ListNFTModal } from "@/components/ListNFTModal";
+import { TransferNFTModal } from "@/components/TransferNFTModal";
 import { OffersList } from "@/components/OffersList";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import { SakuraAnimation } from "@/components/SakuraAnimation";
@@ -21,6 +22,7 @@ const Profile = () => {
   const [listedNFTs, setListedNFTs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [listModalOpen, setListModalOpen] = useState(false);
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState<any>(null);
 
   const isOwnProfile = walletAddress?.toLowerCase() === address?.toLowerCase();
@@ -101,6 +103,11 @@ const Profile = () => {
     setListModalOpen(true);
   };
 
+  const handleTransferNFT = (nft: any) => {
+    setSelectedNFT(nft);
+    setTransferModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
@@ -170,9 +177,17 @@ const Profile = () => {
               onMakeOffer={() => {}}
               showActions={false}
               customAction={isOwnProfile ? {
-                label: "List NFT",
-                onClick: handleListNFT,
-                condition: (nft) => !nft.listing
+                label: (nft: any) => nft.listing ? "Listed" : "List NFT",
+                onClick: (nft: any) => {
+                  if (!nft.listing) {
+                    handleListNFT(nft);
+                  }
+                },
+                condition: (nft: any) => !nft.listing,
+                secondaryAction: {
+                  label: "Transfer",
+                  onClick: handleTransferNFT
+                }
               } : undefined}
             />
           </TabsContent>
@@ -192,6 +207,7 @@ const Profile = () => {
               address={address || ""}
               isOwnProfile={isOwnProfile}
               onOfferAccepted={loadProfileData}
+              walletAddress={walletAddress}
             />
           </TabsContent>
 
@@ -201,14 +217,22 @@ const Profile = () => {
         </Tabs>
       </main>
 
-      {/* List Modal */}
+      {/* Modals */}
       {selectedNFT && (
-        <ListNFTModal
-          open={listModalOpen}
-          onOpenChange={setListModalOpen}
-          nft={selectedNFT}
-          onSuccess={loadProfileData}
-        />
+        <>
+          <ListNFTModal
+            open={listModalOpen}
+            onOpenChange={setListModalOpen}
+            nft={selectedNFT}
+            onSuccess={loadProfileData}
+          />
+          <TransferNFTModal
+            open={transferModalOpen}
+            onOpenChange={setTransferModalOpen}
+            nft={selectedNFT}
+            onSuccess={loadProfileData}
+          />
+        </>
       )}
     </div>
   );

@@ -21,6 +21,8 @@ interface NFTCardProps {
     label: string;
     onClick: () => void;
     show: boolean;
+    secondaryLabel?: string;
+    onSecondaryClick?: () => void;
   };
 }
 
@@ -85,12 +87,23 @@ export const NFTCard = ({
       {(showActions || customAction?.show) && (
         <CardFooter className="p-4 pt-0 gap-2">
           {customAction?.show ? (
-            <Button 
-              onClick={customAction.onClick}
-              className="flex-1 sakura-gradient font-semibold"
-            >
-              {customAction.label}
-            </Button>
+            <>
+              <Button 
+                onClick={customAction.onClick}
+                className="flex-1 sakura-gradient font-semibold"
+              >
+                {customAction.label}
+              </Button>
+              {customAction.secondaryLabel && customAction.onSecondaryClick && (
+                <Button 
+                  onClick={customAction.onSecondaryClick}
+                  variant="outline"
+                  className="flex-1 font-semibold"
+                >
+                  {customAction.secondaryLabel}
+                </Button>
+              )}
+            </>
           ) : showActions ? (
             <>
               {isListed && onBuy && (

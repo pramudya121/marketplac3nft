@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Plus, Search } from "lucide-react";
+import { Sparkles, Plus, Search, BarChart3 } from "lucide-react";
 import { WalletConnect } from "@/components/WalletConnect";
 import { SakuraAnimation } from "@/components/SakuraAnimation";
 import { NFTGrid } from "@/components/NFTGrid";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 import heroImage from "@/assets/hero-sakura.jpg";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [mintModalOpen, setMintModalOpen] = useState(false);
   const [nfts, setNfts] = useState<any[]>([]);
@@ -196,6 +198,14 @@ const Index = () => {
               </h1>
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                onClick={() => navigate("/statistics")}
+                className="backdrop-blur-sm"
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Stats
+              </Button>
               {walletAddress && (
                 <Button
                   onClick={() => setMintModalOpen(true)}
