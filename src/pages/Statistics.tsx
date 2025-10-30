@@ -139,12 +139,17 @@ const Statistics = () => {
 
         {/* Collection Info */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-2">
-            {loading ? <Skeleton className="h-10 w-64 mx-auto" /> : stats.collectionName}
-          </h2>
-          <p className="text-muted-foreground">
-            {loading ? <Skeleton className="h-4 w-32 mx-auto" /> : `Symbol: ${stats.collectionSymbol}`}
-          </p>
+          {loading ? (
+            <>
+              <Skeleton className="h-10 w-64 mx-auto mb-2" />
+              <Skeleton className="h-4 w-32 mx-auto" />
+            </>
+          ) : (
+            <>
+              <h2 className="text-3xl font-bold mb-2">{stats.collectionName}</h2>
+              <p className="text-muted-foreground">Symbol: {stats.collectionSymbol}</p>
+            </>
+          )}
         </div>
 
         {/* Stats Grid */}

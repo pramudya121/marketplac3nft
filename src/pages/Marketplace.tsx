@@ -6,6 +6,9 @@ import { NFTGrid } from "@/components/NFTGrid";
 import { FilterSort } from "@/components/FilterSort";
 import { WalletConnect } from "@/components/WalletConnect";
 import { SakuraAnimation } from "@/components/SakuraAnimation";
+import { MakeOfferModal } from "@/components/MakeOfferModal";
+import { buyNFT, getSigner } from "@/lib/web3";
+import { toast } from "sonner";
 
 interface NFT {
   id: string;
@@ -20,6 +23,7 @@ interface NFT {
     listing_id: number;
     price: string;
     active: boolean;
+    seller_address?: string;
   };
 }
 
@@ -29,6 +33,8 @@ const Marketplace = () => {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("newest");
   const [filterBy, setFilterBy] = useState("all");
+  const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
 
   useEffect(() => {
     loadNFTs();
@@ -75,6 +81,51 @@ const Marketplace = () => {
     setFilteredNfts(filtered);
   };
 
+  const handleBuyNFT = async (nft: NFT) => {
+    if (!nft.listing) {
+      toast.error("This NFT is not listed for sale");
+      return;
+    }
+
+    const signer = await getSigner();
+    if (!signer) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    const success = await buyNFT(nft.listing.listing_id, nft.listing.price);
+    if (success) {
+      // Update database - mark listing as inactive
+      await supabase
+        .from("listings")
+        .update({ active: false })
+        .eq("listing_id", nft.listing.listing_id);
+
+      // Update NFT owner
+      const buyerAddress = await signer.getAddress();
+      await supabase
+        .from("nfts")
+        .update({ owner_address: buyerAddress.toLowerCase() })
+        .eq("id", nft.id);
+
+      // Record transaction
+      await supabase.from("transactions").insert({
+        nft_id: nft.id,
+        from_address: nft.listing.seller_address || nft.owner_address,
+        to_address: buyerAddress.toLowerCase(),
+        transaction_type: "sale",
+        price: nft.listing.price,
+      });
+
+      loadNFTs();
+    }
+  };
+
+  const handleMakeOffer = (nft: NFT) => {
+    setSelectedNFT(nft);
+    setOfferModalOpen(true);
+  };
+
   const loadNFTs = async () => {
     try {
       setLoading(true);
@@ -101,6 +152,7 @@ const Marketplace = () => {
                 listing_id: listing.listing_id,
                 price: listing.price,
                 active: listing.active,
+                seller_address: listing.seller_address,
               }
             : undefined,
         };
@@ -169,17 +221,21 @@ const Marketplace = () => {
           <NFTGrid 
             nfts={filteredNfts} 
             loading={loading}
-            onBuyNFT={(nft) => {
-              // Buy NFT logic
-              console.log("Buy NFT:", nft);
-            }}
-            onMakeOffer={(nft) => {
-              // Make offer logic
-              console.log("Make offer:", nft);
-            }}
+            onBuyNFT={handleBuyNFT}
+            onMakeOffer={handleMakeOffer}
           />
         )}
       </div>
+
+      {/* Make Offer Modal */}
+      {selectedNFT && (
+        <MakeOfferModal
+          open={offerModalOpen}
+          onOpenChange={setOfferModalOpen}
+          nft={selectedNFT}
+          onSuccess={loadNFTs}
+        />
+      )}
     </div>
   );
 };

@@ -41,16 +41,29 @@ const MintNFT = () => {
       return;
     }
 
-    const signer = await getSigner();
-    if (!signer) {
-      toast.error("Please connect your wallet first");
-      return;
-    }
-
     try {
+      // Check wallet connection first
+      if (!window.ethereum) {
+        toast.error("Please install MetaMask or another Web3 wallet");
+        return;
+      }
+
+      const accounts = await window.ethereum.request({ method: "eth_accounts" });
+      if (accounts.length === 0) {
+        toast.error("Please connect your wallet first");
+        return;
+      }
+
+      const signer = await getSigner();
+      if (!signer) {
+        toast.error("Failed to get signer. Please reconnect your wallet");
+        return;
+      }
+
       setLoading(true);
 
       // Upload image to Supabase Storage
+      toast.info("Uploading image...");
       const fileExt = imageFile.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${fileName}`;
@@ -59,7 +72,10 @@ const MintNFT = () => {
         .from("nft-images")
         .upload(filePath, imageFile);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw new Error("Failed to upload image: " + uploadError.message);
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -74,14 +90,14 @@ const MintNFT = () => {
       };
 
       // For simplicity, we'll use the public URL as metadata URI
-      // In production, you'd want to upload this to IPFS or another decentralized storage
       const metadataUri = publicUrl;
 
-      // Mint NFT on blockchain
+      // Mint NFT on blockchain - this will trigger MetaMask popup
+      toast.info("Please confirm the transaction in your wallet...");
       const tokenId = await mintNFT(metadataUri);
       
       if (tokenId === null) {
-        throw new Error("Failed to mint NFT");
+        throw new Error("Failed to mint NFT on blockchain");
       }
 
       // Save to Supabase
@@ -96,13 +112,35 @@ const MintNFT = () => {
         contract_address: CONTRACTS.nftCollection.toLowerCase(),
       });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error("Database error:", dbError);
+        throw new Error("Failed to save NFT to database: " + dbError.message);
+      }
+
+      // Record transaction
+      await supabase.from("transactions").insert({
+        nft_id: null, // Will be updated after insert
+        from_address: "0x0000000000000000000000000000000000000000",
+        to_address: address.toLowerCase(),
+        transaction_type: "mint",
+        price: null,
+      });
 
       toast.success("NFT minted successfully!");
-      navigate("/marketplace");
+      setTimeout(() => {
+        navigate("/marketplace");
+      }, 1500);
     } catch (error: any) {
       console.error("Error minting NFT:", error);
-      toast.error(error.message || "Failed to mint NFT");
+      
+      // User rejected transaction
+      if (error.code === 4001 || error.message?.includes("user rejected")) {
+        toast.error("Transaction rejected by user");
+      } else if (error.message?.includes("insufficient funds")) {
+        toast.error("Insufficient funds for transaction");
+      } else {
+        toast.error(error.message || "Failed to mint NFT");
+      }
     } finally {
       setLoading(false);
     }

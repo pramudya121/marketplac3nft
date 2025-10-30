@@ -107,10 +107,19 @@ export async function getSigner(walletType: WalletType = "metamask") {
       ethereum = window.ethereum;
   }
   
-  if (!ethereum) return null;
-  
-  const provider = new BrowserProvider(ethereum);
-  return provider.getSigner();
+  if (!ethereum) {
+    console.error("No ethereum provider found");
+    return null;
+  }
+
+  try {
+    const provider = new BrowserProvider(ethereum);
+    const signer = await provider.getSigner();
+    return signer;
+  } catch (error) {
+    console.error("Error getting signer:", error);
+    return null;
+  }
 }
 
 export async function getMarketplaceContract() {
