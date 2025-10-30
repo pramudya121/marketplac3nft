@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, ArrowLeft, TrendingUp, Package, Users, DollarSign } from "lucide-react";
+import { TrendingUp, Package, Users, DollarSign } from "lucide-react";
 import { SakuraAnimation } from "@/components/SakuraAnimation";
 import { WalletConnect } from "@/components/WalletConnect";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import heroImage from "@/assets/hero-sakura.jpg";
 
 const Statistics = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalMinted: 0,
@@ -104,47 +103,43 @@ const Statistics = () => {
   );
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background */}
-      <div className="fixed inset-0 -z-10">
-        <img
-          src={heroImage}
-          alt="Sakura Winter"
-          className="w-full h-full object-cover opacity-40"
-        />
-        <div className="absolute inset-0 hero-gradient opacity-60" />
-      </div>
-
+    <div className="min-h-screen pb-12">
       <SakuraAnimation />
-
-      {/* Header */}
-      <header className="sticky top-0 z-50 frost-glass border-b border-white/20">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/")}
-                className="mr-2"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <Sparkles className="h-8 w-8 text-primary animate-float" />
-              <h1 className="text-2xl font-bold text-gradient">
-                Marketplace Statistics
-              </h1>
-            </div>
+      
+      {/* Navbar */}
+      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Helios NFT
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/marketplace">
+              <Button variant="ghost">Marketplace</Button>
+            </Link>
+            <Link to="/mint">
+              <Button variant="ghost">Mint NFT</Button>
+            </Link>
+            <Link to="/activity">
+              <Button variant="ghost">Activity</Button>
+            </Link>
+            <Link to="/statistics">
+              <Button variant="ghost">Statistics</Button>
+            </Link>
             <WalletConnect />
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 relative z-10">
+      {/* Content */}
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-2">Marketplace Statistics</h1>
+        <p className="text-muted-foreground mb-8">
+          Real-time marketplace statistics and analytics
+        </p>
+
         {/* Collection Info */}
         <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-gradient mb-2">
+          <h2 className="text-3xl font-bold mb-2">
             {loading ? <Skeleton className="h-10 w-64 mx-auto" /> : stats.collectionName}
           </h2>
           <p className="text-muted-foreground">
@@ -221,7 +216,7 @@ const Statistics = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
