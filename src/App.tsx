@@ -26,9 +26,9 @@ const App = () => (
           <Route path="/mint" element={<MintNFT />} />
           <Route path="/activity" element={<Activity />} />
           <Route path="/profile/:address" element={<Profile />} />
-        <Route path="/statistics" element={<Statistics />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="*" element={<NotFound />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
