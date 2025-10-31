@@ -9,6 +9,7 @@ import MintNFT from "./pages/MintNFT";
 import Activity from "./pages/Activity";
 import Profile from "./pages/Profile";
 import Statistics from "./pages/Statistics";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,8 +26,9 @@ const App = () => (
           <Route path="/mint" element={<MintNFT />} />
           <Route path="/activity" element={<Activity />} />
           <Route path="/profile/:address" element={<Profile />} />
-          <Route path="/statistics" element={<Statistics />} />
-          <Route path="*" element={<NotFound />} />
+        <Route path="/statistics" element={<Statistics />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

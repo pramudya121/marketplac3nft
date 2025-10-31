@@ -52,6 +52,16 @@ const Home = () => {
               Mint Your NFT
             </Button>
           </Link>
+          <Link to="/statistics">
+            <Button size="lg" variant="outline" className="gap-2">
+              Statistics
+            </Button>
+          </Link>
+          <Link to="/admin">
+            <Button size="lg" variant="outline" className="gap-2">
+              Admin Panel
+            </Button>
+          </Link>
         </div>
       </section>
 
