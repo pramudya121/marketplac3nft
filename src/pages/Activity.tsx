@@ -21,7 +21,7 @@ interface Transaction {
   nfts: {
     name: string;
     image_url: string;
-  };
+  } | null;
 }
 
 const Activity = () => {
@@ -48,7 +48,9 @@ const Activity = () => {
         .limit(50);
 
       if (error) throw error;
-      setTransactions(data || []);
+      // Filter out transactions with null NFT data
+      const validTransactions = (data || []).filter(tx => tx.nfts !== null);
+      setTransactions(validTransactions as Transaction[]);
     } catch (error) {
       console.error("Error loading transactions:", error);
     } finally {
