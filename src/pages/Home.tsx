@@ -57,11 +57,6 @@ const Home = () => {
               Statistics
             </Button>
           </Link>
-          <Link to="/admin">
-            <Button size="lg" variant="outline" className="gap-2">
-              Admin Panel
-            </Button>
-          </Link>
         </div>
       </section>
 

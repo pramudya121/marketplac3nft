@@ -100,9 +100,6 @@ const Activity = () => {
               <Link to="/statistics">
                 <Button variant="ghost">Statistics</Button>
               </Link>
-              <Link to="/admin">
-                <Button variant="ghost">Admin</Button>
-              </Link>
             <WalletConnect />
           </div>
         </div>
