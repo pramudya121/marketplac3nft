@@ -231,12 +231,8 @@ const Marketplace = () => {
           <NFTGrid 
             nfts={filteredNfts} 
             loading={loading}
-            showActions={false}
-            customAction={{
-              label: "View Details",
-              onClick: handleViewDetails,
-              condition: () => true,
-            }}
+            onBuyNFT={handleBuyNFT}
+            onMakeOffer={handleViewDetails}
           />
         )}
       </div>

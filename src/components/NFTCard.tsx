@@ -105,11 +105,11 @@ export const NFTCard = ({
               )}
             </>
           ) : showActions ? (
-            <div className="space-y-2 w-full">
+            <>
               {isListed && onBuy && (
                 <Button 
                   onClick={onBuy} 
-                  className="w-full sakura-gradient font-semibold"
+                  className="flex-1 sakura-gradient font-semibold"
                 >
                   <ShoppingCart className="mr-2 h-4 w-4" />
                   Buy Now
@@ -119,12 +119,12 @@ export const NFTCard = ({
                 <Button 
                   onClick={onMakeOffer} 
                   variant="outline"
-                  className="w-full font-semibold"
+                  className="flex-1 font-semibold"
                 >
-                  Make Offer
+                  View Details
                 </Button>
               )}
-            </div>
+            </>
           ) : null}
         </CardFooter>
       )}
