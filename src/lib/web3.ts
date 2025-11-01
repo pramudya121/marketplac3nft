@@ -230,21 +230,71 @@ export async function listNFT(tokenId: number, price: string): Promise<boolean> 
 export async function buyNFT(listingId: number, price: string): Promise<boolean> {
   try {
     const contract = await getMarketplaceContract();
-    if (!contract) return false;
+    if (!contract) {
+      toast.error("Failed to connect to marketplace contract");
+      return false;
+    }
 
-    const priceInWei = parseEther(price);
-    
-    toast.info("Buying NFT... Please confirm in your wallet");
-    
-    const tx = await contract.buyNFT(listingId, { value: priceInWei });
-    toast.info("Purchase submitted. Waiting for confirmation...");
-    
-    await tx.wait();
-    toast.success("NFT purchased successfully!");
-    return true;
+    const signer = await getSigner();
+    if (!signer) {
+      toast.error("Please connect your wallet first");
+      return false;
+    }
+
+    // Validate listing exists and is active
+    try {
+      const listing = await contract.listings(listingId);
+      if (!listing.active) {
+        toast.error("This NFT is no longer listed for sale");
+        return false;
+      }
+      
+      // Use the actual listing price from contract, not the database
+      const priceInWei = listing.price;
+      
+      // Check buyer's balance
+      const balance = await signer.provider.getBalance(await signer.getAddress());
+      if (balance < priceInWei) {
+        toast.error("Insufficient HELIOS balance");
+        return false;
+      }
+      
+      toast.info("Buying NFT... Please confirm in your wallet");
+      
+      const tx = await contract.buyNFT(listingId, { 
+        value: priceInWei,
+        gasLimit: 500000 // Set explicit gas limit
+      });
+      
+      toast.info("Purchase submitted. Waiting for confirmation...");
+      
+      const receipt = await tx.wait();
+      
+      if (receipt.status === 1) {
+        toast.success("NFT purchased successfully!");
+        return true;
+      } else {
+        toast.error("Transaction failed");
+        return false;
+      }
+    } catch (listingError: any) {
+      console.error("Error fetching listing:", listingError);
+      toast.error("Failed to verify listing details");
+      return false;
+    }
   } catch (error: any) {
     console.error("Error buying NFT:", error);
-    toast.error(error.reason || "Failed to buy NFT");
+    
+    // More detailed error messages
+    if (error.code === "ACTION_REJECTED" || error.code === 4001) {
+      toast.error("Transaction cancelled by user");
+    } else if (error.message?.includes("insufficient funds")) {
+      toast.error("Insufficient HELIOS balance");
+    } else if (error.message?.includes("missing revert data")) {
+      toast.error("Transaction failed. The listing may no longer be active or you may be the seller.");
+    } else {
+      toast.error(error.reason || error.message || "Failed to buy NFT");
+    }
     return false;
   }
 }

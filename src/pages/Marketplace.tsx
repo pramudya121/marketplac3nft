@@ -94,37 +94,63 @@ const Marketplace = () => {
         return;
       }
 
+      const buyerAddress = await signer.getAddress();
+      const buyerAddressLower = buyerAddress.toLowerCase();
+      
+      // Check if buyer is not the seller
+      if (buyerAddressLower === nft.owner_address.toLowerCase()) {
+        toast.error("You cannot buy your own NFT");
+        return;
+      }
+
+      console.log("Buying NFT with listing_id:", nft.listing.listing_id);
+      console.log("Price:", nft.listing.price);
+
       const success = await buyNFT(nft.listing.listing_id, nft.listing.price);
+      
       if (success) {
+        console.log("Buy successful, updating database...");
+        
         // Update database - mark listing as inactive
-        await supabase
+        const { error: listingError } = await supabase
           .from("listings")
           .update({ active: false })
           .eq("listing_id", nft.listing.listing_id);
+        
+        if (listingError) {
+          console.error("Error updating listing:", listingError);
+        }
 
         // Update NFT owner
-        const buyerAddress = await signer.getAddress();
-        await supabase
+        const { error: nftError } = await supabase
           .from("nfts")
-          .update({ owner_address: buyerAddress.toLowerCase() })
+          .update({ owner_address: buyerAddressLower })
           .eq("id", nft.id);
+        
+        if (nftError) {
+          console.error("Error updating NFT owner:", nftError);
+        }
 
         // Record transaction
-        await supabase.from("transactions").insert({
+        const { error: txError } = await supabase.from("transactions").insert({
           nft_id: nft.id,
           from_address: nft.listing.seller_address || nft.owner_address,
-          to_address: buyerAddress.toLowerCase(),
+          to_address: buyerAddressLower,
           transaction_type: "sale",
           price: nft.listing.price,
         });
+        
+        if (txError) {
+          console.error("Error recording transaction:", txError);
+        }
 
-        toast.success("NFT purchased successfully!");
-        loadNFTs();
+        console.log("Database updated successfully");
+        await loadNFTs();
         setDetailsModalOpen(false);
       }
-    } catch (error) {
-      console.error("Error buying NFT:", error);
-      toast.error("Failed to purchase NFT. Please try again.");
+    } catch (error: any) {
+      console.error("Error in handleBuyNFT:", error);
+      toast.error(`Error buying NFT: ${error.message || "Unknown error"}`);
     }
   };
 
