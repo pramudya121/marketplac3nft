@@ -65,8 +65,9 @@ const Admin = () => {
         setNewFee(fee.toString());
         setNewRecipient(recipient);
 
-        // Check if connected wallet is owner
-        setIsOwner(address.toLowerCase() === owner.toLowerCase());
+        // Check if connected wallet is the authorized admin
+        const authorizedAdmin = "0x938b31bcc5fced235ebcbf776d443ae5080c56fa";
+        setIsOwner(address.toLowerCase() === authorizedAdmin.toLowerCase());
       }
     } catch (error) {
       console.error("Error loading admin data:", error);

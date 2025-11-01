@@ -6,7 +6,7 @@ import { NFTGrid } from "@/components/NFTGrid";
 import { FilterSort } from "@/components/FilterSort";
 import { WalletConnect } from "@/components/WalletConnect";
 import { SakuraAnimation } from "@/components/SakuraAnimation";
-import { MakeOfferModal } from "@/components/MakeOfferModal";
+import { NFTDetailsModal } from "@/components/NFTDetailsModal";
 import { buyNFT, getSigner } from "@/lib/web3";
 import { toast } from "sonner";
 
@@ -33,7 +33,7 @@ const Marketplace = () => {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("newest");
   const [filterBy, setFilterBy] = useState("all");
-  const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
 
   useEffect(() => {
@@ -87,43 +87,50 @@ const Marketplace = () => {
       return;
     }
 
-    const signer = await getSigner();
-    if (!signer) {
-      toast.error("Please connect your wallet first");
-      return;
-    }
+    try {
+      const signer = await getSigner();
+      if (!signer) {
+        toast.error("Please connect your wallet first");
+        return;
+      }
 
-    const success = await buyNFT(nft.listing.listing_id, nft.listing.price);
-    if (success) {
-      // Update database - mark listing as inactive
-      await supabase
-        .from("listings")
-        .update({ active: false })
-        .eq("listing_id", nft.listing.listing_id);
+      const success = await buyNFT(nft.listing.listing_id, nft.listing.price);
+      if (success) {
+        // Update database - mark listing as inactive
+        await supabase
+          .from("listings")
+          .update({ active: false })
+          .eq("listing_id", nft.listing.listing_id);
 
-      // Update NFT owner
-      const buyerAddress = await signer.getAddress();
-      await supabase
-        .from("nfts")
-        .update({ owner_address: buyerAddress.toLowerCase() })
-        .eq("id", nft.id);
+        // Update NFT owner
+        const buyerAddress = await signer.getAddress();
+        await supabase
+          .from("nfts")
+          .update({ owner_address: buyerAddress.toLowerCase() })
+          .eq("id", nft.id);
 
-      // Record transaction
-      await supabase.from("transactions").insert({
-        nft_id: nft.id,
-        from_address: nft.listing.seller_address || nft.owner_address,
-        to_address: buyerAddress.toLowerCase(),
-        transaction_type: "sale",
-        price: nft.listing.price,
-      });
+        // Record transaction
+        await supabase.from("transactions").insert({
+          nft_id: nft.id,
+          from_address: nft.listing.seller_address || nft.owner_address,
+          to_address: buyerAddress.toLowerCase(),
+          transaction_type: "sale",
+          price: nft.listing.price,
+        });
 
-      loadNFTs();
+        toast.success("NFT purchased successfully!");
+        loadNFTs();
+        setDetailsModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error buying NFT:", error);
+      toast.error("Failed to purchase NFT. Please try again.");
     }
   };
 
-  const handleMakeOffer = (nft: NFT) => {
+  const handleViewDetails = (nft: NFT) => {
     setSelectedNFT(nft);
-    setOfferModalOpen(true);
+    setDetailsModalOpen(true);
   };
 
   const loadNFTs = async () => {
@@ -224,21 +231,24 @@ const Marketplace = () => {
           <NFTGrid 
             nfts={filteredNfts} 
             loading={loading}
-            onBuyNFT={handleBuyNFT}
-            onMakeOffer={handleMakeOffer}
+            showActions={false}
+            customAction={{
+              label: "View Details",
+              onClick: handleViewDetails,
+              condition: () => true,
+            }}
           />
         )}
       </div>
 
-      {/* Make Offer Modal */}
-      {selectedNFT && (
-        <MakeOfferModal
-          open={offerModalOpen}
-          onOpenChange={setOfferModalOpen}
-          nft={selectedNFT}
-          onSuccess={loadNFTs}
-        />
-      )}
+      {/* NFT Details Modal */}
+      <NFTDetailsModal
+        open={detailsModalOpen}
+        onOpenChange={setDetailsModalOpen}
+        nft={selectedNFT}
+        onBuyNFT={selectedNFT ? () => handleBuyNFT(selectedNFT) : undefined}
+        onSuccess={loadNFTs}
+      />
     </div>
   );
 };
