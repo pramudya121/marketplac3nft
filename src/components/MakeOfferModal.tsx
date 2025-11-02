@@ -54,21 +54,24 @@ export const MakeOfferModal = ({
       const accounts = await window.ethereum.request({ method: "eth_accounts" });
       const offererAddress = accounts[0].toLowerCase();
 
+      // Convert price to Wei for database (to match blockchain state)
+      const priceInWei = (parseFloat(offerPrice) * 1e18).toString();
+
       // Save offer to database
       const { error: dbError } = await supabase.from("offers").insert({
         nft_id: nft.id,
         offerer_address: offererAddress,
-        price: offerPrice,
+        price: priceInWei,
         active: true,
       });
 
       if (dbError) throw dbError;
 
-      // Record transaction
+      // Record transaction in HLS for easy reading
       await supabase.from("transactions").insert({
         nft_id: nft.id,
         from_address: offererAddress,
-        to_address: "0x0000000000000000000000000000000000000000", // Placeholder for offer
+        to_address: "0x0000000000000000000000000000000000000000",
         transaction_type: "offer",
         price: offerPrice,
       });

@@ -124,13 +124,14 @@ const Marketplace = () => {
           console.error("Error updating NFT owner:", nftError);
         }
 
-        // Record transaction
+        // Record transaction with price in HLS (converted from Wei)
+        const priceInHLS = (parseFloat(nft.listing.price) / 1e18).toFixed(4);
         const { error: txError } = await supabase.from("transactions").insert({
           nft_id: nft.id,
           from_address: nft.listing.seller_address || nft.owner_address,
           to_address: buyerAddressLower,
           transaction_type: "sale",
-          price: nft.listing.price,
+          price: priceInHLS,
         });
         
         if (txError) {

@@ -98,7 +98,7 @@ export const TransactionHistory = ({ address }: TransactionHistoryProps) => {
                 </div>
                 {tx.price && (
                   <div className="text-right">
-                    <p className="font-semibold text-lg">{tx.price} HELIOS</p>
+                    <p className="font-semibold text-lg">{parseFloat(tx.price).toFixed(4)} HLS</p>
                     <p className="text-xs text-muted-foreground capitalize">
                       {tx.transaction_type.replace("_", " ")}
                     </p>

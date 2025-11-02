@@ -143,12 +143,24 @@ const Profile = () => {
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent mb-4 shadow-glow">
             <Sparkles className="h-12 w-12 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gradient mb-2">
-            {address?.substring(0, 6)}...{address?.substring(address.length - 4)}
-          </h2>
-          {isOwnProfile && (
-            <p className="text-sm text-muted-foreground">Your Profile</p>
-          )}
+          
+          {/* Profile Name Section */}
+          <div className="mb-4">
+            <h1 className="text-4xl font-bold text-gradient mb-2">
+              {isOwnProfile ? "My Profile" : "User Profile"}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              NFT Collector & Creator
+            </p>
+          </div>
+          
+          {/* Wallet Address Section */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+            <span className="text-sm text-muted-foreground">Wallet:</span>
+            <h2 className="text-lg font-mono font-semibold">
+              {address?.substring(0, 6)}...{address?.substring(address.length - 4)}
+            </h2>
+          </div>
         </div>
 
         {/* Tabs */}

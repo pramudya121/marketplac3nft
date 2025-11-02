@@ -113,13 +113,17 @@ export const NFTDetailsModal = ({
         const signer = await getSigner();
         const offererAddress = await signer?.getAddress();
 
+        // Convert price to Wei for database (to match blockchain state)
+        const priceInWei = (parseFloat(offerPrice) * 1e18).toString();
+
         await supabase.from("offers").insert({
           nft_id: nft.id,
           offerer_address: offererAddress?.toLowerCase(),
-          price: offerPrice,
+          price: priceInWei,
           active: true,
         });
 
+        // Record transaction in HLS for easy reading
         await supabase.from("transactions").insert({
           nft_id: nft.id,
           from_address: offererAddress?.toLowerCase() || "",
