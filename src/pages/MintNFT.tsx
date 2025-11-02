@@ -126,9 +126,9 @@ const MintNFT = () => {
         price: null,
       });
 
-      toast.success("NFT minted successfully!");
+      toast.success("NFT minted successfully! You can now list it for sale.");
       setTimeout(() => {
-        navigate("/marketplace");
+        navigate(`/profile/${address.toLowerCase()}`);
       }, 1500);
     } catch (error: any) {
       console.error("Error minting NFT:", error);

@@ -32,7 +32,6 @@ const Marketplace = () => {
   const [filteredNfts, setFilteredNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("newest");
-  const [filterBy, setFilterBy] = useState("all");
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
 
@@ -42,17 +41,11 @@ const Marketplace = () => {
 
   useEffect(() => {
     applyFiltersAndSort();
-  }, [nfts, sortBy, filterBy]);
+  }, [nfts, sortBy]);
 
   const applyFiltersAndSort = () => {
-    let filtered = [...nfts];
-
-    // Apply filter
-    if (filterBy === "listed") {
-      filtered = filtered.filter(nft => nft.listing?.active);
-    } else if (filterBy === "unlisted") {
-      filtered = filtered.filter(nft => !nft.listing);
-    }
+    // Only show NFTs with active listings in marketplace
+    let filtered = nfts.filter(nft => nft.listing?.active);
 
     // Apply sort
     filtered.sort((a, b) => {
@@ -242,8 +235,6 @@ const Marketplace = () => {
         <FilterSort 
           sortBy={sortBy}
           onSortChange={setSortBy}
-          filterBy={filterBy}
-          onFilterChange={setFilterBy}
         />
 
         {loading ? (

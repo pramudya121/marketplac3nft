@@ -10,8 +10,8 @@ import { Label } from "@/components/ui/label";
 interface FilterSortProps {
   sortBy: string;
   onSortChange: (value: string) => void;
-  filterBy: string;
-  onFilterChange: (value: string) => void;
+  filterBy?: string;
+  onFilterChange?: (value: string) => void;
 }
 
 export const FilterSort = ({
@@ -39,19 +39,21 @@ export const FilterSort = ({
         </Select>
       </div>
 
-      <div className="flex-1 min-w-[200px]">
-        <Label className="text-sm mb-2 block">Filter</Label>
-        <Select value={filterBy} onValueChange={onFilterChange}>
-          <SelectTrigger className="frost-glass">
-            <SelectValue placeholder="Filter by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All NFTs</SelectItem>
-            <SelectItem value="listed">Listed Only</SelectItem>
-            <SelectItem value="unlisted">Not Listed</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {filterBy && onFilterChange && (
+        <div className="flex-1 min-w-[200px]">
+          <Label className="text-sm mb-2 block">Filter</Label>
+          <Select value={filterBy} onValueChange={onFilterChange}>
+            <SelectTrigger className="frost-glass">
+              <SelectValue placeholder="Filter by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All NFTs</SelectItem>
+              <SelectItem value="listed">Listed Only</SelectItem>
+              <SelectItem value="unlisted">Not Listed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
     </div>
   );
 };
