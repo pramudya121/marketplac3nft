@@ -94,12 +94,15 @@ const Activity = () => {
             <Link to="/mint">
               <Button variant="ghost">Mint NFT</Button>
             </Link>
+            <Link to="/profile">
+              <Button variant="ghost">Profile</Button>
+            </Link>
             <Link to="/activity">
               <Button variant="ghost">Activity</Button>
             </Link>
-              <Link to="/statistics">
-                <Button variant="ghost">Statistics</Button>
-              </Link>
+            <Link to="/statistics">
+              <Button variant="ghost">Statistics</Button>
+            </Link>
             <WalletConnect />
           </div>
         </div>

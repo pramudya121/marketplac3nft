@@ -23,6 +23,9 @@ const Home = () => {
             <Link to="/mint">
               <Button variant="ghost">Mint NFT</Button>
             </Link>
+            <Link to="/profile">
+              <Button variant="ghost">Profile</Button>
+            </Link>
             <Link to="/activity">
               <Button variant="ghost">Activity</Button>
             </Link>

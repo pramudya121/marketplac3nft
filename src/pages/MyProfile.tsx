@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NFTGrid } from "@/components/NFTGrid";
@@ -12,10 +12,8 @@ import { OffersList } from "@/components/OffersList";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import { SakuraAnimation } from "@/components/SakuraAnimation";
 import { WalletConnect } from "@/components/WalletConnect";
-import heroImage from "@/assets/hero-sakura.jpg";
 
-const Profile = () => {
-  const { address } = useParams<{ address: string }>();
+const MyProfile = () => {
   const navigate = useNavigate();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [ownedNFTs, setOwnedNFTs] = useState<any[]>([]);
@@ -25,30 +23,43 @@ const Profile = () => {
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState<any>(null);
 
-  const isOwnProfile = walletAddress?.toLowerCase() === address?.toLowerCase();
-
   useEffect(() => {
     const checkWallet = async () => {
       if (window.ethereum) {
         const accounts = await window.ethereum.request({ method: "eth_accounts" });
         if (accounts.length > 0) {
           setWalletAddress(accounts[0]);
+        } else {
+          toast.error("Please connect your wallet first");
+          navigate("/");
         }
+      } else {
+        toast.error("Please install MetaMask");
+        navigate("/");
       }
     };
     checkWallet();
 
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts: string[]) => {
-        setWalletAddress(accounts.length > 0 ? accounts[0] : null);
+        if (accounts.length > 0) {
+          setWalletAddress(accounts[0]);
+        } else {
+          setWalletAddress(null);
+          navigate("/");
+        }
       });
     }
+  }, [navigate]);
 
-    loadProfileData();
-  }, [address]);
+  useEffect(() => {
+    if (walletAddress) {
+      loadProfileData();
+    }
+  }, [walletAddress]);
 
   const loadProfileData = async () => {
-    if (!address) return;
+    if (!walletAddress) return;
     
     setLoading(true);
     try {
@@ -59,7 +70,7 @@ const Profile = () => {
           *,
           listings:listings(listing_id, price, active)
         `)
-        .eq("owner_address", address.toLowerCase())
+        .eq("owner_address", walletAddress.toLowerCase())
         .order("created_at", { ascending: false });
 
       if (ownedError) throw ownedError;
@@ -78,7 +89,7 @@ const Profile = () => {
           *,
           listings!inner(listing_id, price, active, seller_address)
         `)
-        .eq("listings.seller_address", address.toLowerCase())
+        .eq("listings.seller_address", walletAddress.toLowerCase())
         .eq("listings.active", true)
         .order("created_at", { ascending: false });
 
@@ -107,6 +118,10 @@ const Profile = () => {
     setSelectedNFT(nft);
     setTransferModalOpen(true);
   };
+
+  if (!walletAddress) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen pb-12">
@@ -150,7 +165,7 @@ const Profile = () => {
           {/* Profile Name Section */}
           <div className="mb-4">
             <h1 className="text-4xl font-bold text-gradient mb-2">
-              {isOwnProfile ? "My Profile" : "User Profile"}
+              My Profile
             </h1>
             <p className="text-sm text-muted-foreground">
               NFT Collector & Creator
@@ -161,7 +176,7 @@ const Profile = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <span className="text-sm text-muted-foreground">Wallet:</span>
             <h2 className="text-lg font-mono font-semibold">
-              {address?.substring(0, 6)}...{address?.substring(address.length - 4)}
+              {walletAddress?.substring(0, 6)}...{walletAddress?.substring(walletAddress.length - 4)}
             </h2>
           </div>
         </div>
@@ -182,7 +197,7 @@ const Profile = () => {
               onBuyNFT={() => {}}
               onMakeOffer={() => {}}
               showActions={false}
-              customAction={isOwnProfile ? {
+              customAction={{
                 label: (nft: any) => nft.listing ? "Listed" : "List NFT",
                 onClick: (nft: any) => {
                   if (!nft.listing) {
@@ -194,7 +209,7 @@ const Profile = () => {
                   label: "Transfer",
                   onClick: handleTransferNFT
                 }
-              } : undefined}
+              }}
             />
           </TabsContent>
 
@@ -210,15 +225,15 @@ const Profile = () => {
 
           <TabsContent value="offers">
             <OffersList
-              address={address || ""}
-              isOwnProfile={isOwnProfile}
+              address={walletAddress || ""}
+              isOwnProfile={true}
               onOfferAccepted={loadProfileData}
               walletAddress={walletAddress}
             />
           </TabsContent>
 
           <TabsContent value="history">
-            <TransactionHistory address={address || ""} />
+            <TransactionHistory address={walletAddress || ""} />
           </TabsContent>
         </Tabs>
       </div>
@@ -244,4 +259,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default MyProfile;
