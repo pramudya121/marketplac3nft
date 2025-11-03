@@ -205,6 +205,7 @@ All colors MUST be HSL.
     mask-composite: exclude;
     opacity: 0;
     transition: opacity 0.4s ease;
+    pointer-events: none;
   }
 
   .card-hover:hover {
