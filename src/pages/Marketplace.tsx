@@ -226,12 +226,14 @@ const Marketplace = () => {
       </nav>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex justify-between items-center mb-12">
           <div>
-            <h1 className="text-4xl font-bold mb-2">NFT Marketplace</h1>
-            <p className="text-muted-foreground">
-              Discover, collect, and trade unique digital assets
+            <h1 className="text-5xl font-bold mb-3">
+              <span className="text-gradient">Explore NFTs</span>
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Discover, collect, and trade unique digital assets on Helios
             </p>
           </div>
         </div>

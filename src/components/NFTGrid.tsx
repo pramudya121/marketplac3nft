@@ -1,5 +1,7 @@
 import { NFTCard } from "./NFTCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface NFT {
   id: string;
@@ -56,12 +58,19 @@ export const NFTGrid = ({
 
   if (nfts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-6xl mb-4">🌸</div>
-        <h3 className="text-2xl font-bold mb-2">No NFTs Found</h3>
-        <p className="text-muted-foreground">
-          Be the first to mint and list an NFT in this marketplace!
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div className="w-24 h-24 rounded-full glass-card border border-primary/20 flex items-center justify-center mb-6 animate-float">
+          <div className="text-5xl">🎨</div>
+        </div>
+        <h3 className="text-3xl font-bold mb-3">No NFTs Found</h3>
+        <p className="text-muted-foreground text-lg max-w-md mb-8">
+          Be the first to mint and list an NFT in this marketplace! Create something amazing and start trading.
         </p>
+        <Link to="/mint">
+          <Button className="premium-gradient h-12 px-8 font-semibold premium-button text-white shadow-lg">
+            Mint Your First NFT
+          </Button>
+        </Link>
       </div>
     );
   }

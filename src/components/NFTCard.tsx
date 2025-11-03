@@ -45,39 +45,45 @@ export const NFTCard = ({
   };
 
   return (
-    <Card className={cn("card-hover overflow-hidden border-2", className)}>
+    <Card className={cn("card-hover overflow-hidden card-gradient border border-border/50", className)}>
       <CardContent className="p-0">
-        <div className="relative aspect-square overflow-hidden">
+        <div className="relative aspect-square overflow-hidden group">
           <img
             src={imageUrl}
             alt={name}
-            className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+            className="h-full w-full object-cover transition-all duration-500 group-hover:scale-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           {isListed && (
-            <Badge className="absolute top-3 right-3 sakura-gradient border-0">
-              Listed
+            <Badge className="absolute top-3 right-3 premium-gradient border-0 text-white font-semibold shadow-lg">
+              For Sale
             </Badge>
           )}
+          <div className="absolute top-3 left-3 glass-card px-3 py-1 rounded-full">
+            <span className="text-xs font-medium text-foreground">#{tokenId}</span>
+          </div>
         </div>
-        <div className="p-4 space-y-3">
+        <div className="p-5 space-y-4">
           <div>
-            <h3 className="font-bold text-lg mb-1">{name}</h3>
+            <h3 className="font-bold text-xl mb-1.5 truncate">{name}</h3>
             {description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{description}</p>
             )}
           </div>
           
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <User className="h-4 w-4" />
-            <span>{formatAddress(owner)}</span>
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+              <User className="h-3 w-3 text-white" />
+            </div>
+            <span className="text-muted-foreground">{formatAddress(owner)}</span>
           </div>
 
           {price && (
-            <div className="flex items-center gap-2">
-              <Tag className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Price</p>
-                <p className="font-bold text-lg">{formatPrice(price)} HELIOS</p>
+            <div className="pt-3 border-t border-border/50">
+              <p className="text-xs text-muted-foreground mb-1">Current Price</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-gradient">{formatPrice(price)}</span>
+                <span className="text-sm text-muted-foreground">HELIOS</span>
               </div>
             </div>
           )}
@@ -85,12 +91,12 @@ export const NFTCard = ({
       </CardContent>
 
       {(showActions || customAction?.show) && (
-        <CardFooter className="p-4 pt-0 gap-2">
+        <CardFooter className="p-5 pt-0 gap-3">
           {customAction?.show ? (
             <>
               <Button 
                 onClick={customAction.onClick}
-                className="flex-1 sakura-gradient font-semibold"
+                className="flex-1 premium-gradient font-semibold h-11 premium-button text-white shadow-lg hover:shadow-primary"
               >
                 {customAction.label}
               </Button>
@@ -98,7 +104,7 @@ export const NFTCard = ({
                 <Button 
                   onClick={customAction.onSecondaryClick}
                   variant="outline"
-                  className="flex-1 font-semibold"
+                  className="flex-1 font-semibold h-11 border-primary/30 hover:border-primary hover:bg-primary/10"
                 >
                   {customAction.secondaryLabel}
                 </Button>
@@ -109,9 +115,9 @@ export const NFTCard = ({
               {isListed && onBuy && (
                 <Button 
                   onClick={onBuy} 
-                  className="flex-1 sakura-gradient font-semibold"
+                  className="flex-1 premium-gradient font-semibold h-11 premium-button text-white shadow-lg hover:shadow-primary"
                 >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  <ShoppingCart className="mr-2 h-5 w-5" />
                   Buy Now
                 </Button>
               )}
@@ -119,7 +125,7 @@ export const NFTCard = ({
                 <Button 
                   onClick={onMakeOffer} 
                   variant="outline"
-                  className="flex-1 font-semibold"
+                  className="flex-1 font-semibold h-11 border-primary/30 hover:border-primary hover:bg-primary/10"
                 >
                   View Details
                 </Button>
