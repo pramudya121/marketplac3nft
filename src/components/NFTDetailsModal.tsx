@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { makeOffer, cancelOffer, getSigner } from "@/lib/web3";
+import { makeOffer, cancelOffer, acceptOffer, getSigner } from "@/lib/web3";
 import { toast } from "sonner";
 import { Loader2, Tag, User, ShoppingCart } from "lucide-react";
 import { formatPrice } from "@/lib/web3";
@@ -53,6 +53,7 @@ export const NFTDetailsModal = ({
   const [loadingOffers, setLoadingOffers] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
   const [cancellingOffer, setCancellingOffer] = useState<string | null>(null);
+  const [acceptingOffer, setAcceptingOffer] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && nft) {
@@ -166,6 +167,46 @@ export const NFTDetailsModal = ({
     }
   };
 
+  const handleAcceptOffer = async (offer: Offer) => {
+    setAcceptingOffer(offer.id);
+    try {
+      const success = await acceptOffer(nft!.token_id);
+      
+      if (success) {
+        // Update offer status
+        await supabase
+          .from("offers")
+          .update({ active: false })
+          .eq("id", offer.id);
+
+        // Update NFT owner
+        await supabase
+          .from("nfts")
+          .update({ owner_address: offer.offerer_address.toLowerCase() })
+          .eq("id", nft!.id);
+
+        // Record transaction in HLS
+        const priceInHLS = formatPrice(offer.price);
+        await supabase.from("transactions").insert({
+          nft_id: nft!.id,
+          from_address: nft!.owner_address,
+          to_address: offer.offerer_address.toLowerCase(),
+          transaction_type: "offer_accepted",
+          price: priceInHLS,
+        });
+
+        toast.success("Offer accepted successfully!");
+        loadOffers();
+        onSuccess?.();
+        onOpenChange(false);
+      }
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+    } finally {
+      setAcceptingOffer(null);
+    }
+  };
+
   if (!nft) return null;
 
   const formatAddress = (addr: string) => {
@@ -175,6 +216,8 @@ export const NFTDetailsModal = ({
   const userOffers = offers.filter(
     (offer) => offer.offerer_address.toLowerCase() === userAddress
   );
+
+  const isOwner = userAddress && nft.owner_address.toLowerCase() === userAddress;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -300,34 +343,56 @@ export const NFTDetailsModal = ({
                     {offers.map((offer) => {
                       const isUserOffer = offer.offerer_address.toLowerCase() === userAddress;
                       return (
-                        <Card key={offer.id} className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-semibold">
+                        <Card key={offer.id} className="p-4 card-gradient border border-border/50">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex-1">
+                              <p className="font-bold text-lg text-gradient">
                                 {formatPrice(offer.price)} HELIOS
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 by {formatAddress(offer.offerer_address)}
                                 {isUserOffer && " (You)"}
                               </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(offer.created_at).toLocaleDateString()}
+                              </p>
                             </div>
-                            {isUserOffer && (
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => handleCancelOffer(offer.id, nft.token_id)}
-                                disabled={cancellingOffer === offer.id}
-                              >
-                                {cancellingOffer === offer.id ? (
-                                  <>
-                                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                    Cancelling...
-                                  </>
-                                ) : (
-                                  "Cancel Offer"
-                                )}
-                              </Button>
-                            )}
+                            <div className="flex gap-2">
+                              {isOwner && !isUserOffer && (
+                                <Button
+                                  className="premium-gradient premium-button text-white shadow-lg hover:shadow-primary"
+                                  size="sm"
+                                  onClick={() => handleAcceptOffer(offer)}
+                                  disabled={acceptingOffer === offer.id}
+                                >
+                                  {acceptingOffer === offer.id ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                      Accepting...
+                                    </>
+                                  ) : (
+                                    "Accept"
+                                  )}
+                                </Button>
+                              )}
+                              {isUserOffer && (
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleCancelOffer(offer.id, nft.token_id)}
+                                  disabled={cancellingOffer === offer.id}
+                                >
+                                  {cancellingOffer === offer.id ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                      Cancelling...
+                                    </>
+                                  ) : (
+                                    "Cancel"
+                                  )}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </Card>
                       );
