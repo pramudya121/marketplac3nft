@@ -9,6 +9,10 @@ import { SakuraAnimation } from "@/components/SakuraAnimation";
 import { NFTDetailsModal } from "@/components/NFTDetailsModal";
 import { buyNFT, getSigner } from "@/lib/web3";
 import { toast } from "sonner";
+import { AIChat } from "@/components/AIChat";
+import { AdvancedFilters } from "@/components/AdvancedFilters";
+import { TrendingNFTs } from "@/components/TrendingNFTs";
+import { MarketplaceStats } from "@/components/MarketplaceStats";
 
 interface NFT {
   id: string;
@@ -34,18 +38,71 @@ const Marketplace = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
+  const [userAddress, setUserAddress] = useState<string>("");
+  const [filters, setFilters] = useState({
+    minPrice: "",
+    maxPrice: "",
+    searchQuery: "",
+    hasOffers: false,
+    isActive: true
+  });
 
   useEffect(() => {
     loadNFTs();
+    getUserAddress();
   }, []);
+
+  const getUserAddress = async () => {
+    try {
+      const signer = await getSigner();
+      if (signer) {
+        const address = await signer.getAddress();
+        setUserAddress(address);
+      }
+    } catch (error) {
+      console.error("Error getting user address:", error);
+    }
+  };
 
   useEffect(() => {
     applyFiltersAndSort();
-  }, [nfts, sortBy]);
+  }, [nfts, sortBy, filters]);
 
-  const applyFiltersAndSort = () => {
+  const applyFiltersAndSort = async () => {
     // Only show NFTs with active listings in marketplace
-    let filtered = nfts.filter(nft => nft.listing?.active);
+    let filtered = nfts.filter(nft => filters.isActive ? nft.listing?.active : true);
+
+    // Apply search filter
+    if (filters.searchQuery) {
+      filtered = filtered.filter(nft =>
+        nft.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+        nft.description?.toLowerCase().includes(filters.searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply price filters
+    if (filters.minPrice) {
+      filtered = filtered.filter(nft =>
+        nft.listing && parseFloat(nft.listing.price) >= parseFloat(filters.minPrice)
+      );
+    }
+    if (filters.maxPrice) {
+      filtered = filtered.filter(nft =>
+        nft.listing && parseFloat(nft.listing.price) <= parseFloat(filters.maxPrice)
+      );
+    }
+
+    // Apply offers filter
+    if (filters.hasOffers) {
+      const nftsWithOffers = new Set<string>();
+      const { data: offersData } = await supabase
+        .from("offers")
+        .select("nft_id")
+        .eq("active", true);
+      
+      offersData?.forEach(offer => nftsWithOffers.add(offer.nft_id));
+      filtered = filtered.filter(nft => nftsWithOffers.has(nft.id));
+    }
 
     // Apply sort
     filtered.sort((a, b) => {
@@ -238,24 +295,46 @@ const Marketplace = () => {
           </div>
         </div>
 
-        <FilterSort 
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-        />
+        {/* Statistics */}
+        <div className="mb-8">
+          <MarketplaceStats />
+        </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-6">
+            <div className="flex gap-4 items-center">
+              <FilterSort 
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+              />
+              <AdvancedFilters onFilterChange={setFilters} />
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center items-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <NFTGrid 
+                nfts={filteredNfts} 
+                loading={loading}
+                onBuyNFT={handleBuyNFT}
+                onMakeOffer={handleViewDetails}
+                userAddress={userAddress}
+              />
+            )}
           </div>
-        ) : (
-          <NFTGrid 
-            nfts={filteredNfts} 
-            loading={loading}
-            onBuyNFT={handleBuyNFT}
-            onMakeOffer={handleViewDetails}
-          />
-        )}
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <TrendingNFTs />
+          </div>
+        </div>
       </div>
+
+      {/* AI Chat Assistant */}
+      <AIChat />
 
       {/* NFT Details Modal */}
       <NFTDetailsModal

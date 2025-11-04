@@ -1,12 +1,16 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Tag, User } from "lucide-react";
+import { ShoppingCart, Tag, User, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/web3";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface NFTCardProps {
   tokenId: number;
+  nftId: string;
   name: string;
   description?: string;
   imageUrl: string;
@@ -17,6 +21,7 @@ interface NFTCardProps {
   onMakeOffer?: () => void;
   className?: string;
   showActions?: boolean;
+  userAddress?: string;
   customAction?: {
     label: string;
     onClick: () => void;
@@ -28,6 +33,7 @@ interface NFTCardProps {
 
 export const NFTCard = ({
   tokenId,
+  nftId,
   name,
   description,
   imageUrl,
@@ -38,8 +44,77 @@ export const NFTCard = ({
   onMakeOffer,
   className,
   showActions = true,
+  userAddress,
   customAction,
 }: NFTCardProps) => {
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+
+  useEffect(() => {
+    if (userAddress) {
+      checkFavorite();
+    }
+  }, [userAddress, nftId]);
+
+  const checkFavorite = async () => {
+    if (!userAddress) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("favorites")
+        .select("id")
+        .eq("user_address", userAddress.toLowerCase())
+        .eq("nft_id", nftId)
+        .maybeSingle();
+
+      if (!error && data) {
+        setIsFavorited(true);
+      }
+    } catch (error) {
+      console.error("Error checking favorite:", error);
+    }
+  };
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!userAddress) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    setFavoriteLoading(true);
+    try {
+      if (isFavorited) {
+        const { error } = await supabase
+          .from("favorites")
+          .delete()
+          .eq("user_address", userAddress.toLowerCase())
+          .eq("nft_id", nftId);
+
+        if (error) throw error;
+        setIsFavorited(false);
+        toast.success("Removed from favorites");
+      } else {
+        const { error } = await supabase
+          .from("favorites")
+          .insert({
+            user_address: userAddress.toLowerCase(),
+            nft_id: nftId
+          });
+
+        if (error) throw error;
+        setIsFavorited(true);
+        toast.success("Added to favorites");
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast.error("Failed to update favorites");
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
   const formatAddress = (addr: string) => {
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
   };
@@ -62,6 +137,23 @@ export const NFTCard = ({
           <div className="absolute top-3 left-3 glass-card px-3 py-1 rounded-full">
             <span className="text-xs font-medium text-foreground">#{tokenId}</span>
           </div>
+          <Button
+            onClick={toggleFavorite}
+            disabled={favoriteLoading}
+            size="icon"
+            variant="ghost"
+            className={cn(
+              "absolute top-3 left-1/2 -translate-x-1/2 h-10 w-10 rounded-full glass-card opacity-0 group-hover:opacity-100 transition-opacity",
+              isFavorited && "opacity-100"
+            )}
+          >
+            <Heart
+              className={cn(
+                "h-5 w-5 transition-colors",
+                isFavorited ? "fill-red-500 text-red-500" : "text-foreground"
+              )}
+            />
+          </Button>
         </div>
         <div className="p-5 space-y-4">
           <div>

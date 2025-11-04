@@ -23,6 +23,7 @@ interface NFTGridProps {
   onBuyNFT?: (nft: NFT) => void;
   onMakeOffer?: (nft: NFT) => void;
   showActions?: boolean;
+  userAddress?: string;
   customAction?: {
     label: string | ((nft: NFT) => string);
     onClick: (nft: NFT) => void;
@@ -40,6 +41,7 @@ export const NFTGrid = ({
   onBuyNFT, 
   onMakeOffer,
   showActions = true,
+  userAddress,
   customAction,
 }: NFTGridProps) => {
   if (loading) {
@@ -81,6 +83,7 @@ export const NFTGrid = ({
         <NFTCard
           key={nft.id}
           tokenId={nft.token_id}
+          nftId={nft.id}
           name={nft.name}
           description={nft.description}
           imageUrl={nft.image_url}
@@ -90,6 +93,7 @@ export const NFTGrid = ({
           onBuy={onBuyNFT ? () => onBuyNFT(nft) : undefined}
           onMakeOffer={onMakeOffer ? () => onMakeOffer(nft) : undefined}
           showActions={showActions}
+          userAddress={userAddress}
           customAction={customAction ? {
             label: typeof customAction.label === 'function' ? customAction.label(nft) : customAction.label,
             onClick: () => customAction.onClick(nft),
