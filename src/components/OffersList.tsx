@@ -66,21 +66,36 @@ export const OffersList = ({ address, isOwnProfile, onOfferAccepted, walletAddre
   const handleAcceptOffer = async (offer: any) => {
     setAcceptingOffer(offer.id);
     try {
+      console.log("Accepting offer for token_id:", offer.nfts.token_id);
+      console.log("Offer details:", offer);
+      
       const success = await acceptOffer(offer.nfts.token_id);
       
       if (success) {
+        console.log("Blockchain accept successful, updating database...");
+        
         // Update database
-        await supabase
+        const { error: offerError } = await supabase
           .from("offers")
           .update({ active: false })
           .eq("id", offer.id);
 
-        await supabase
+        if (offerError) {
+          console.error("Error updating offer:", offerError);
+          throw new Error(`Failed to update offer: ${offerError.message}`);
+        }
+
+        const { error: nftError } = await supabase
           .from("nfts")
           .update({ owner_address: offer.offerer_address })
           .eq("id", offer.nft_id);
 
-        await supabase.from("transactions").insert({
+        if (nftError) {
+          console.error("Error updating NFT owner:", nftError);
+          throw new Error(`Failed to update NFT owner: ${nftError.message}`);
+        }
+
+        const { error: txError } = await supabase.from("transactions").insert({
           nft_id: offer.nft_id,
           from_address: address.toLowerCase(),
           to_address: offer.offerer_address,
@@ -88,13 +103,20 @@ export const OffersList = ({ address, isOwnProfile, onOfferAccepted, walletAddre
           transaction_type: "offer_accepted",
         });
 
+        if (txError) {
+          console.error("Error recording transaction:", txError);
+          throw new Error(`Failed to record transaction: ${txError.message}`);
+        }
+
         toast.success("Offer accepted!");
         loadOffers();
         onOfferAccepted?.();
+      } else {
+        throw new Error("Blockchain transaction failed");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accepting offer:", error);
-      toast.error("Failed to accept offer");
+      toast.error(`Error accepting offer: ${error.message || "Unknown error"}`);
     } finally {
       setAcceptingOffer(null);
     }

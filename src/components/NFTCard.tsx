@@ -210,7 +210,7 @@ export const NFTCard = ({
                   className="flex-1 premium-gradient font-semibold h-11 premium-button text-white shadow-lg hover:shadow-primary"
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  Buy Now
+                  Buy
                 </Button>
               )}
               {onMakeOffer && (
