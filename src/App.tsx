@@ -4,12 +4,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import MintNFT from "./pages/MintNFT";
 import Activity from "./pages/Activity";
 import Profile from "./pages/Profile";
 import MyProfile from "./pages/MyProfile";
-import Statistics from "./pages/Statistics";
+import Analytics from "./pages/Analytics";
+import Collections from "./pages/Collections";
+import Watchlist from "./pages/Watchlist";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,12 +25,15 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/index" element={<Index />} />
           <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/collections" element={<Collections />} />
           <Route path="/mint" element={<MintNFT />} />
           <Route path="/activity" element={<Activity />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/profile" element={<MyProfile />} />
           <Route path="/profile/:address" element={<Profile />} />
-          <Route path="/statistics" element={<Statistics />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

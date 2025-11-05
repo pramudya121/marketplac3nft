@@ -1,140 +1,205 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Sparkles, ShoppingBag, Palette, Activity } from "lucide-react";
+import { Sparkles, Zap, Shield, TrendingUp, Heart, BarChart3 } from "lucide-react";
 import { WalletConnect } from "@/components/WalletConnect";
 import { SakuraAnimation } from "@/components/SakuraAnimation";
+import { TrendingNFTs } from "@/components/TrendingNFTs";
+import { MarketplaceStats } from "@/components/MarketplaceStats";
+import heroImage from "@/assets/hero-sakura.jpg";
 
 const Home = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background */}
+      <div className="fixed inset-0 -z-10">
+        <img
+          src={heroImage}
+          alt="Sakura Winter"
+          className="w-full h-full object-cover opacity-40"
+        />
+        <div className="absolute inset-0 hero-gradient opacity-60" />
+      </div>
+
       <SakuraAnimation />
-      
-      {/* Navbar */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Helios NFT
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/marketplace">
-              <Button variant="ghost">Marketplace</Button>
-            </Link>
-            <Link to="/mint">
-              <Button variant="ghost">Mint NFT</Button>
-            </Link>
-            <Link to="/profile">
-              <Button variant="ghost">Profile</Button>
-            </Link>
-            <Link to="/activity">
-              <Button variant="ghost">Activity</Button>
-            </Link>
-            <WalletConnect />
+
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 frost-glass border-b border-white/20">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-8 w-8 text-primary animate-float" />
+              <h1 className="text-2xl font-bold text-gradient">Helios NFT</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" onClick={() => navigate("/")}>
+                Home
+              </Button>
+              <Button variant="ghost" onClick={() => navigate("/marketplace")}>
+                Marketplace
+              </Button>
+              <Button variant="ghost" onClick={() => navigate("/collections")}>
+                Collections
+              </Button>
+              <Button variant="ghost" onClick={() => navigate("/analytics")}>
+                Analytics
+              </Button>
+              <Button variant="ghost" onClick={() => navigate("/watchlist")}>
+                <Heart className="h-4 w-4 mr-2" />
+                Watchlist
+              </Button>
+              <WalletConnect />
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-24 md:py-32 text-center relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
-        <div className="relative z-10">
-          <div className="inline-block mb-6 px-4 py-2 rounded-full glass-card border border-primary/20">
-            <span className="text-sm font-semibold text-gradient">Welcome to the Future of Digital Art</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-float">
-            <span className="text-gradient">Discover, Collect</span>
+      <section className="container mx-auto px-4 py-20 text-center relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-6xl md:text-7xl font-bold mb-6 text-gradient animate-float">
+            Discover, Collect & Trade
             <br />
-            <span className="text-gradient">& Trade NFTs</span>
+            Exclusive NFTs
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            The premier NFT marketplace on Helios Testnet. Create, buy, sell, and discover unique digital assets in the most advanced decentralized platform.
+          <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-2xl mx-auto">
+            The premier marketplace for digital collectibles on Helios blockchain.
+            Create, buy, and sell extraordinary NFTs.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <Link to="/marketplace">
-              <Button size="lg" className="gap-2 premium-gradient h-14 px-8 text-base font-semibold premium-button shadow-lg hover:shadow-primary text-white">
-                <ShoppingBag className="w-5 h-5" />
-                Explore Marketplace
-              </Button>
-            </Link>
-            <Link to="/mint">
-              <Button size="lg" variant="outline" className="gap-2 h-14 px-8 text-base font-semibold border-primary/30 hover:border-primary hover:bg-primary/10">
-                <Palette className="w-5 h-5" />
-                Mint Your NFT
-              </Button>
-            </Link>
-            <Link to="/statistics">
-              <Button size="lg" variant="outline" className="gap-2 h-14 px-8 text-base font-semibold border-secondary/30 hover:border-secondary hover:bg-secondary/10">
-                <Activity className="w-5 h-5" />
-                View Statistics
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              className="sakura-gradient text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
+              onClick={() => navigate("/marketplace")}
+            >
+              <Sparkles className="mr-2 h-5 w-5" />
+              Explore Marketplace
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg px-8 py-6 frost-glass"
+              onClick={() => navigate("/mint")}
+            >
+              Create NFT
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg px-8 py-6 frost-glass"
+              onClick={() => navigate("/analytics")}
+            >
+              <BarChart3 className="mr-2 h-5 w-5" />
+              View Stats
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="container mx-auto px-4 py-20">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose Helios NFT?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="p-8 card-hover card-gradient border border-border/50">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center mb-6 shadow-primary">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold mb-3">Create NFTs</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Mint your unique digital assets on the Helios blockchain with just a few clicks. Low gas fees and instant confirmation.
-            </p>
-          </Card>
+      {/* Stats Section */}
+      <section className="container mx-auto px-4 py-12 relative z-10">
+        <MarketplaceStats />
+      </section>
 
-          <Card className="p-8 card-hover card-gradient border border-border/50">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center mb-6 shadow-secondary">
-              <ShoppingBag className="w-8 h-8 text-white" />
+      {/* Features Section */}
+      <section className="container mx-auto px-4 py-16 relative z-10">
+        <h2 className="text-4xl font-bold text-center mb-12 text-gradient">
+          Why Choose Helios NFT?
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="glass-card card-hover p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full sakura-gradient flex items-center justify-center">
+              <Zap className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-2xl font-bold mb-3">Trade & Collect</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Buy, sell, and make offers on NFTs in our secure marketplace with industry-leading low fees and instant transactions.
+            <h3 className="text-2xl font-bold mb-3">Lightning Fast</h3>
+            <p className="text-muted-foreground">
+              Ultra-low gas fees and instant transactions on Helios blockchain
             </p>
-          </Card>
+          </div>
 
-          <Card className="p-8 card-hover card-gradient border border-border/50">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mb-6 shadow-secondary">
-              <Activity className="w-8 h-8 text-white" />
+          <div className="glass-card card-hover p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full sakura-gradient flex items-center justify-center">
+              <Shield className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-2xl font-bold mb-3">Track Activity</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Monitor all transactions and market activity in real-time on the blockchain with advanced analytics and insights.
+            <h3 className="text-2xl font-bold mb-3">100% Secure</h3>
+            <p className="text-muted-foreground">
+              Audited smart contracts ensuring the safety of your digital assets
             </p>
-          </Card>
+          </div>
+
+          <div className="glass-card card-hover p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full sakura-gradient flex items-center justify-center">
+              <TrendingUp className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3">Track & Grow</h3>
+            <p className="text-muted-foreground">
+              Advanced analytics to track your collection's value and growth
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="glass-card border border-primary/10 rounded-3xl p-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            <div className="space-y-2">
-              <div className="text-5xl md:text-6xl font-bold text-gradient mb-3">100%</div>
-              <div className="text-lg font-semibold">Decentralized</div>
-              <div className="text-sm text-muted-foreground">True ownership on blockchain</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-5xl md:text-6xl font-bold text-gradient mb-3">Ultra Low</div>
-              <div className="text-lg font-semibold">Gas Fees</div>
-              <div className="text-sm text-muted-foreground">Trade efficiently on Helios</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-5xl md:text-6xl font-bold text-gradient mb-3">Secure</div>
-              <div className="text-lg font-semibold">Smart Contracts</div>
-              <div className="text-sm text-muted-foreground">Audited and battle-tested</div>
-            </div>
-          </div>
+      {/* Trending Section */}
+      <section className="container mx-auto px-4 py-16 relative z-10">
+        <h2 className="text-4xl font-bold text-center mb-12 text-gradient">
+          Trending NFTs
+        </h2>
+        <TrendingNFTs />
+        <div className="text-center mt-8">
+          <Button
+            size="lg"
+            variant="outline"
+            className="frost-glass"
+            onClick={() => navigate("/marketplace")}
+          >
+            View All NFTs
+          </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8 mt-20">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2025 Helios NFT Marketplace. Built on Helios Testnet.</p>
+      <footer className="relative z-10 py-12 mt-16 border-t border-white/20 frost-glass">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-6 w-6 text-primary" />
+                <span className="font-bold text-xl">Helios NFT</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                The premier NFT marketplace on Helios blockchain
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Marketplace</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="/marketplace" className="hover:text-primary transition-colors">Browse NFTs</a></li>
+                <li><a href="/collections" className="hover:text-primary transition-colors">Collections</a></li>
+                <li><a href="/mint" className="hover:text-primary transition-colors">Create</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Resources</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="/analytics" className="hover:text-primary transition-colors">Analytics</a></li>
+                <li><a href="/activity" className="hover:text-primary transition-colors">Activity</a></li>
+                <li><a href="/watchlist" className="hover:text-primary transition-colors">Watchlist</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Account</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="/profile" className="hover:text-primary transition-colors">My Profile</a></li>
+                <li><a href="/watchlist" className="hover:text-primary transition-colors">My Watchlist</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center pt-8 border-t border-white/20">
+            <p className="text-sm text-muted-foreground">
+              © 2025 Helios NFT Marketplace • Powered by Helios Blockchain • Made with 🌸 and ❄️
+            </p>
+          </div>
         </div>
       </footer>
     </div>

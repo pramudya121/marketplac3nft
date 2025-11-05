@@ -262,20 +262,20 @@ const Marketplace = () => {
             Helios NFT
           </Link>
           <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="ghost">Home</Button>
+            </Link>
             <Link to="/marketplace">
               <Button variant="ghost">Marketplace</Button>
             </Link>
-            <Link to="/mint">
-              <Button variant="ghost">Mint NFT</Button>
+            <Link to="/collections">
+              <Button variant="ghost">Collections</Button>
             </Link>
-            <Link to="/profile">
-              <Button variant="ghost">Profile</Button>
+            <Link to="/analytics">
+              <Button variant="ghost">Analytics</Button>
             </Link>
-            <Link to="/activity">
-              <Button variant="ghost">Activity</Button>
-            </Link>
-            <Link to="/statistics">
-              <Button variant="ghost">Statistics</Button>
+            <Link to="/watchlist">
+              <Button variant="ghost">Watchlist</Button>
             </Link>
             <WalletConnect />
           </div>
