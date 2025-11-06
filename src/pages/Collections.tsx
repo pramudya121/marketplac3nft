@@ -9,6 +9,7 @@ import { SakuraAnimation } from "@/components/SakuraAnimation";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-sakura.jpg";
+import { FilterSort } from "@/components/FilterSort";
 
 interface Collection {
   owner_address: string;
@@ -23,6 +24,7 @@ const Collections = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("nft_count");
 
   useEffect(() => {
     loadCollections();
@@ -71,8 +73,7 @@ const Collections = () => {
       });
 
       const collectionsArray = Array.from(collectionsMap.values())
-        .filter(c => c.nft_count > 0)
-        .sort((a, b) => b.nft_count - a.nft_count);
+        .filter(c => c.nft_count > 0);
 
       setCollections(collectionsArray);
     } catch (error) {
@@ -83,9 +84,25 @@ const Collections = () => {
     }
   };
 
-  const filteredCollections = collections.filter((collection) =>
-    collection.owner_address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAndSortedCollections = collections
+    .filter((collection) =>
+      collection.owner_address.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "floor_price_low":
+          return (a.floor_price || Infinity) - (b.floor_price || Infinity);
+        case "floor_price_high":
+          return (b.floor_price || 0) - (a.floor_price || 0);
+        case "volume_low":
+          return a.total_volume - b.total_volume;
+        case "volume_high":
+          return b.total_volume - a.total_volume;
+        case "nft_count":
+        default:
+          return b.nft_count - a.nft_count;
+      }
+    });
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -146,8 +163,8 @@ const Collections = () => {
           </p>
         </div>
 
-        {/* Search */}
-        <div className="max-w-2xl mx-auto mb-8">
+        {/* Search and Sort */}
+        <div className="max-w-4xl mx-auto mb-8 space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
@@ -157,6 +174,10 @@ const Collections = () => {
               className="pl-10 h-12 frost-glass"
             />
           </div>
+          <FilterSort
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+          />
         </div>
 
         {/* Collections Grid */}
@@ -177,12 +198,12 @@ const Collections = () => {
                 </CardContent>
               </Card>
             ))
-          ) : filteredCollections.length === 0 ? (
+          ) : filteredAndSortedCollections.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <p className="text-muted-foreground text-lg">No collections found</p>
             </div>
           ) : (
-            filteredCollections.map((collection, index) => (
+            filteredAndSortedCollections.map((collection, index) => (
               <Card
                 key={collection.owner_address}
                 className="glass-card card-hover cursor-pointer transition-all"

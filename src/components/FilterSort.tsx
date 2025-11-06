@@ -35,6 +35,11 @@ export const FilterSort = ({
             <SelectItem value="price_high">Price: High to Low</SelectItem>
             <SelectItem value="name_asc">Name: A to Z</SelectItem>
             <SelectItem value="name_desc">Name: Z to A</SelectItem>
+            <SelectItem value="nft_count">Most NFTs</SelectItem>
+            <SelectItem value="floor_price_low">Floor Price: Low to High</SelectItem>
+            <SelectItem value="floor_price_high">Floor Price: High to Low</SelectItem>
+            <SelectItem value="volume_low">Volume: Low to High</SelectItem>
+            <SelectItem value="volume_high">Volume: High to Low</SelectItem>
           </SelectContent>
         </Select>
       </div>
