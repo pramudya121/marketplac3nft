@@ -33,8 +33,13 @@ export function MarketplaceStats() {
         supabase.from("offers").select("id", { count: "exact", head: true }).eq("active", true)
       ]);
 
+      // Calculate total volume - convert from wei if needed
       const totalVolume = (transactionsData.data || [])
-        .reduce((sum, t) => sum + parseFloat(t.price || "0"), 0)
+        .reduce((sum, t) => {
+          const price = parseFloat(t.price || "0");
+          // If price is very large (likely in wei), convert to HELIOS
+          return sum + (price > 1000000 ? price / 1e18 : price);
+        }, 0)
         .toFixed(2);
 
       setStats({

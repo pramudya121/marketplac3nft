@@ -58,8 +58,11 @@ const Statistics = () => {
         .from("nfts")
         .select("owner_address");
 
+      // Calculate total volume - convert from wei if needed
       const totalVolume = transactions?.reduce((sum, tx) => {
-        return sum + parseFloat(tx.price || "0");
+        const price = parseFloat(tx.price || "0");
+        // If price is very large (likely in wei), convert to HELIOS
+        return sum + (price > 1000000 ? price / 1e18 : price);
       }, 0) || 0;
 
       const uniqueOwners = new Set(nfts?.map((nft) => nft.owner_address)).size;
@@ -68,7 +71,7 @@ const Statistics = () => {
         totalMinted: minted,
         totalListed: listed,
         totalSales: transactions?.length || 0,
-        totalVolume: totalVolume.toFixed(4),
+        totalVolume: totalVolume.toFixed(2),
         marketplaceFee: fee / 100, // Convert from basis points
         feeRecipient: recipient,
         collectionName: name,

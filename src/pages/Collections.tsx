@@ -17,6 +17,11 @@ interface Collection {
   total_volume: number;
   floor_price: number;
   listed_count: number;
+  volume_24h?: number;
+  volume_7d?: number;
+  volume_change_24h?: number;
+  volume_change_7d?: number;
+  is_verified?: boolean;
 }
 
 const Collections = () => {
@@ -33,15 +38,31 @@ const Collections = () => {
   const loadCollections = async () => {
     setLoading(true);
     try {
-      // Get all NFTs with their listings
+      // Get all NFTs with their listings and transactions
       const { data: nftsData, error } = await supabase
         .from("nfts")
         .select(`
           owner_address,
+          id,
           listings:listings(price, active)
         `);
 
       if (error) throw error;
+
+      // Get transactions for volume trends
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      const { data: transactions24h } = await supabase
+        .from("transactions")
+        .select("to_address, price")
+        .gte("created_at", oneDayAgo.toISOString());
+
+      const { data: transactions7d } = await supabase
+        .from("transactions")
+        .select("to_address, price")
+        .gte("created_at", sevenDaysAgo.toISOString());
 
       // Group by owner and calculate stats
       const collectionsMap = new Map<string, Collection>();
@@ -51,29 +72,75 @@ const Collections = () => {
         const existing = collectionsMap.get(owner);
         const activeListing = nft.listings?.find((l: any) => l.active);
         const price = activeListing ? parseFloat(activeListing.price) : 0;
+        const normalizedPrice = price > 1000000 ? price / 1e18 : price;
 
         if (existing) {
           existing.nft_count++;
-          existing.total_volume += price;
+          existing.total_volume += normalizedPrice;
           if (activeListing) {
             existing.listed_count++;
-            if (price < existing.floor_price || existing.floor_price === 0) {
-              existing.floor_price = price;
+            if (normalizedPrice < existing.floor_price || existing.floor_price === 0) {
+              existing.floor_price = normalizedPrice;
             }
           }
         } else {
           collectionsMap.set(owner, {
             owner_address: owner,
             nft_count: 1,
-            total_volume: price,
-            floor_price: activeListing ? price : 0,
+            total_volume: normalizedPrice,
+            floor_price: activeListing ? normalizedPrice : 0,
             listed_count: activeListing ? 1 : 0,
+            volume_24h: 0,
+            volume_7d: 0,
+            volume_change_24h: 0,
+            volume_change_7d: 0,
+            is_verified: false,
           });
         }
       });
 
+      // Calculate volume trends
+      transactions24h?.forEach((tx) => {
+        const owner = tx.to_address.toLowerCase();
+        const collection = collectionsMap.get(owner);
+        if (collection) {
+          const price = parseFloat(tx.price || "0");
+          const normalizedPrice = price > 1000000 ? price / 1e18 : price;
+          collection.volume_24h! += normalizedPrice;
+        }
+      });
+
+      transactions7d?.forEach((tx) => {
+        const owner = tx.to_address.toLowerCase();
+        const collection = collectionsMap.get(owner);
+        if (collection) {
+          const price = parseFloat(tx.price || "0");
+          const normalizedPrice = price > 1000000 ? price / 1e18 : price;
+          collection.volume_7d! += normalizedPrice;
+        }
+      });
+
+      // Calculate percentage changes and mark top collections as verified
       const collectionsArray = Array.from(collectionsMap.values())
-        .filter(c => c.nft_count > 0);
+        .filter(c => c.nft_count > 0)
+        .sort((a, b) => b.nft_count - a.nft_count)
+        .map((collection, index) => {
+          const prevVolume24h = collection.total_volume - (collection.volume_24h || 0);
+          const prevVolume7d = collection.total_volume - (collection.volume_7d || 0);
+          
+          collection.volume_change_24h = prevVolume24h > 0 
+            ? ((collection.volume_24h || 0) / prevVolume24h) * 100 
+            : 0;
+          
+          collection.volume_change_7d = prevVolume7d > 0 
+            ? ((collection.volume_7d || 0) / prevVolume7d) * 100 
+            : 0;
+
+          // Mark top 10 collections as verified
+          collection.is_verified = index < 10 && collection.nft_count >= 3;
+
+          return collection;
+        });
 
       setCollections(collectionsArray);
     } catch (error) {
@@ -212,9 +279,18 @@ const Collections = () => {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg mb-1">
-                        {formatAddress(collection.owner_address)}
-                      </CardTitle>
+                      <div className="flex items-center gap-2 mb-1">
+                        <CardTitle className="text-lg">
+                          {formatAddress(collection.owner_address)}
+                        </CardTitle>
+                        {collection.is_verified && (
+                          <div className="sakura-gradient px-2 py-0.5 rounded-full">
+                            <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
                       <CardDescription>
                         Collection #{index + 1}
                       </CardDescription>
@@ -247,6 +323,41 @@ const Collections = () => {
                         </span>
                       </div>
                     )}
+                    
+                    {/* Volume Trends */}
+                    {(collection.volume_24h! > 0 || collection.volume_7d! > 0) && (
+                      <div className="pt-2 border-t border-border/50 space-y-2">
+                        {collection.volume_24h! > 0 && (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">24h Volume</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">{collection.volume_24h!.toFixed(2)} HELIOS</span>
+                              {collection.volume_change_24h! !== 0 && (
+                                <span className={collection.volume_change_24h! > 0 ? "text-green-500" : "text-red-500"}>
+                                  {collection.volume_change_24h! > 0 ? "↑" : "↓"}
+                                  {Math.abs(collection.volume_change_24h!).toFixed(1)}%
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {collection.volume_7d! > 0 && (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">7d Volume</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">{collection.volume_7d!.toFixed(2)} HELIOS</span>
+                              {collection.volume_change_7d! !== 0 && (
+                                <span className={collection.volume_change_7d! > 0 ? "text-green-500" : "text-red-500"}>
+                                  {collection.volume_change_7d! > 0 ? "↑" : "↓"}
+                                  {Math.abs(collection.volume_change_7d!).toFixed(1)}%
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <Button
                       className="w-full mt-4"
                       variant="outline"
