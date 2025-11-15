@@ -11,7 +11,7 @@ export const HELIOS_TESTNET = {
 export const CONTRACTS = {
   marketplace: "0x084724341e07F50782E1c3923D9a6Fb7ce993816",
   nftCollection: "0xEc94943b75359f1ede3d639AD548e56239d754c2",
-  offer: "0x31351646e2c5479A30f846dFa4297E9Dbe189a63",
+  offer: "0x4e4CA8c653F34b46F7B1DEb8DcEf80852e242bdb",
 };
 
 // Marketplace ABI
@@ -248,77 +248,201 @@ export const NFT_COLLECTION_ABI = [
 export const OFFER_ABI = [
   {
     inputs: [
-      { internalType: "address", name: "nft", type: "address" },
-      { internalType: "uint256", name: "tokenId", type: "uint256" },
+      {
+        internalType: "uint256",
+        name: "offerId",
+        type: "uint256"
+      }
     ],
     name: "acceptOffer",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
+    type: "function"
   },
   {
     inputs: [
-      { internalType: "address", name: "nft", type: "address" },
-      { internalType: "uint256", name: "tokenId", type: "uint256" },
+      {
+        internalType: "uint256",
+        name: "offerId",
+        type: "uint256"
+      }
     ],
     name: "cancelOffer",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
+    type: "function"
   },
   {
     inputs: [
-      { internalType: "address", name: "nft", type: "address" },
-      { internalType: "uint256", name: "tokenId", type: "uint256" },
+      {
+        internalType: "address",
+        name: "nft",
+        type: "address"
+      },
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256"
+      }
     ],
     name: "makeOffer",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
+    ],
     stateMutability: "payable",
-    type: "function",
+    type: "function"
   },
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "address", name: "nft", type: "address" },
-      { indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" },
-      { indexed: true, internalType: "address", name: "buyer", type: "address" },
-      { indexed: false, internalType: "uint256", name: "price", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "offerId",
+        type: "uint256"
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "seller",
+        type: "address"
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "nft",
+        type: "address"
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256"
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      }
     ],
     name: "OfferAccepted",
-    type: "event",
+    type: "event"
   },
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "address", name: "nft", type: "address" },
-      { indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" },
-      { indexed: true, internalType: "address", name: "offerer", type: "address" },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "offerId",
+        type: "uint256"
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "offeror",
+        type: "address"
+      }
     ],
     name: "OfferCancelled",
-    type: "event",
+    type: "event"
   },
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "address", name: "nft", type: "address" },
-      { indexed: true, internalType: "uint256", name: "tokenId", type: "uint256" },
-      { indexed: true, internalType: "address", name: "offerer", type: "address" },
-      { indexed: false, internalType: "uint256", name: "price", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "offerId",
+        type: "uint256"
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "offeror",
+        type: "address"
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "nft",
+        type: "address"
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256"
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      }
     ],
     name: "OfferMade",
-    type: "event",
+    type: "event"
+  },
+  {
+    stateMutability: "payable",
+    type: "receive"
+  },
+  {
+    inputs: [],
+    name: "offerCount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
   },
   {
     inputs: [
-      { internalType: "address", name: "", type: "address" },
-      { internalType: "uint256", name: "", type: "uint256" },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
     ],
     name: "offers",
     outputs: [
-      { internalType: "address", name: "offerer", type: "address" },
-      { internalType: "uint256", name: "price", type: "uint256" },
+      {
+        internalType: "address",
+        name: "offeror",
+        type: "address"
+      },
+      {
+        internalType: "address",
+        name: "nft",
+        type: "address"
+      },
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256"
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        internalType: "bool",
+        name: "active",
+        type: "bool"
+      }
     ],
     stateMutability: "view",
-    type: "function",
-  },
+    type: "function"
+  }
 ];
