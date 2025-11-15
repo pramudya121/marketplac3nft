@@ -10,7 +10,6 @@ import MintNFT from "./pages/MintNFT";
 import Activity from "./pages/Activity";
 import Profile from "./pages/Profile";
 import MyProfile from "./pages/MyProfile";
-import Analytics from "./pages/Analytics";
 import Collections from "./pages/Collections";
 import Watchlist from "./pages/Watchlist";
 import NotFound from "./pages/NotFound";
@@ -30,7 +29,6 @@ const App = () => (
           <Route path="/collections" element={<Collections />} />
           <Route path="/mint" element={<MintNFT />} />
           <Route path="/activity" element={<Activity />} />
-          <Route path="/analytics" element={<Analytics />} />
           <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/profile" element={<MyProfile />} />
           <Route path="/profile/:address" element={<Profile />} />

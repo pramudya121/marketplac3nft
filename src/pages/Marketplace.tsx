@@ -271,9 +271,6 @@ const Marketplace = () => {
             <Link to="/collections">
               <Button variant="ghost">Collections</Button>
             </Link>
-            <Link to="/analytics">
-              <Button variant="ghost">Analytics</Button>
-            </Link>
             <Link to="/watchlist">
               <Button variant="ghost">Watchlist</Button>
             </Link>

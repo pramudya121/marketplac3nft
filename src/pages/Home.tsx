@@ -42,9 +42,6 @@ const Home = () => {
               <Button variant="ghost" onClick={() => navigate("/collections")}>
                 Collections
               </Button>
-              <Button variant="ghost" onClick={() => navigate("/analytics")}>
-                Analytics
-              </Button>
               <Button variant="ghost" onClick={() => navigate("/watchlist")}>
                 <Heart className="h-4 w-4 mr-2" />
                 Watchlist
@@ -83,15 +80,6 @@ const Home = () => {
               onClick={() => navigate("/mint")}
             >
               Create NFT
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-lg px-8 py-6 frost-glass"
-              onClick={() => navigate("/analytics")}
-            >
-              <BarChart3 className="mr-2 h-5 w-5" />
-              View Stats
             </Button>
           </div>
         </div>
@@ -182,7 +170,6 @@ const Home = () => {
             <div>
               <h4 className="font-semibold mb-3">Resources</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/analytics" className="hover:text-primary transition-colors">Analytics</a></li>
                 <li><a href="/activity" className="hover:text-primary transition-colors">Activity</a></li>
                 <li><a href="/watchlist" className="hover:text-primary transition-colors">Watchlist</a></li>
               </ul>

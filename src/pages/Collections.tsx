@@ -207,9 +207,6 @@ const Collections = () => {
               <Button variant="ghost" onClick={() => navigate("/collections")}>
                 Collections
               </Button>
-              <Button variant="ghost" onClick={() => navigate("/analytics")}>
-                Analytics
-              </Button>
               <Button variant="ghost" onClick={() => navigate("/watchlist")}>
                 Watchlist
               </Button>
