@@ -34,93 +34,26 @@ export function NotificationBell({ userAddress }: NotificationBellProps) {
 
   useEffect(() => {
     if (!userAddress) return;
-
-    loadNotifications();
-
-    // Subscribe to real-time notifications
-    const channel = supabase
-      .channel(`notifications-${userAddress}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_address=eq.${userAddress}`
-        },
-        (payload) => {
-          const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev]);
-          setUnreadCount(prev => prev + 1);
-          
-          // Show toast for new notification
-          toast.info(newNotification.title, {
-            description: newNotification.message
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // Notifications table not yet created - using empty state for now
+    setNotifications([]);
+    setUnreadCount(0);
   }, [userAddress]);
 
   const loadNotifications = async () => {
-    if (!userAddress) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_address", userAddress)
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-      if (error) throw error;
-      setNotifications(data || []);
-      setUnreadCount((data || []).filter(n => !n.read).length);
-    } catch (error) {
-      console.error("Error loading notifications:", error);
-    }
+    // Will be implemented once notifications table is created
   };
 
   const markAsRead = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from("notifications")
-        .update({ read: true })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, read: true } : n)
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
+    setNotifications(prev =>
+      prev.map(n => n.id === id ? { ...n, read: true } : n)
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   const markAllAsRead = async () => {
-    if (!userAddress) return;
-
-    try {
-      const { error } = await supabase
-        .from("notifications")
-        .update({ read: true })
-        .eq("user_address", userAddress)
-        .eq("read", false);
-
-      if (error) throw error;
-
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      setUnreadCount(0);
-      toast.success("All notifications marked as read");
-    } catch (error) {
-      console.error("Error marking all as read:", error);
-    }
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+    toast.success("All notifications marked as read");
   };
 
   const getNotificationIcon = (type: string) => {
